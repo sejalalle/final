@@ -120,6 +120,8 @@ function Navbar() {
   return (
     <div className="w-full">
       <div className="bg-green-300 h-2"></div>
+      <div className="bg-red-500 text-white p-4">Tailwind is Working</div>
+
       <nav
         className={`${
           isSticky ? "fixed" : "absolute"

@@ -25,14 +25,14 @@ const AnimatedBoxes = () => (
   </svg>
 );
 const shapes = [
-  { id: "square-box", name: "Square Box", image: "/images/SquareBox.jpg" },
-  { id: "tall-bottle-box", name: "Bottle Box", image: "/images/TallBottleBox.jpg" },
-  { id: "tuck-end-box", name: "Tuck End Box", image: "/images/tuckend.jpg" },
-  { id: "pizza-box", name: "Pizza Box", image: "/images/PizzaBox.jpg" },
-  { id: "flip-top-box", name: "Flip Top Box", image: "/images/FlipTop.jpg" },
-  { id: "cylinder", name: "Can", image: "/images/Can.jpg" },
-  { id: "shipping-box", name: "Shipping Box", image: "/images/shippingbox.jpg" },
-  { id: "tube-box", name: "Tube Box", image: "/images/tubebox.jpg" },
+  { id: "square-box", name: "Square Box", image: "/MImages/SquareBox.jpg" },
+  { id: "tall-bottle-box", name: "Bottle Box", image: "/MImages/TallBottleBox.jpg" },
+  { id: "tuck-end-box", name: "Tuck End Box", image: "/MImages/tuckend.jpg" },
+  { id: "pizza-box", name: "Pizza Box", image: "/MImages/PizzaBox.jpg" },
+  { id: "flip-top-box", name: "Flip Top Box", image: "/MImages/FlipTop.jpg" },
+  { id: "cylinder", name: "Can", image: "/MImages/Can.jpg" },
+  { id: "shipping-box", name: "Shipping Box", image: "/MImages/shippingbox.jpg" },
+  { id: "tube-box", name: "Tube Box", image: "/MImages/tubebox.jpg" },
 ];
 
 const Home = () => {
