@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
-import Navbar from "../../components/Navbar";
+import Navbar from "../../components/NavBar";
 import SquareBox from "../shapes/SquareBoxRenderer";
 import TallBottleBox from "../shapes/TallBottleBoxRenderer";
 import TuckEndBox from "../shapes/TuckEndBoxRenderer";
