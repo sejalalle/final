@@ -85,29 +85,30 @@ const Customization = () => {
 
   const undo = () => {
     if (history.length > 0) {
-      const lastState = history.pop();
+      const lastState = history[history.length - 1]; // Get last saved state
       setRedoStack((prev) => [...prev, { faceColors, faceImages, imagePositions, imageScales, backgroundColor }]);
       setFaceColors(lastState.faceColors);
       setFaceImages(lastState.faceImages);
       setImagePositions(lastState.imagePositions);
       setImageScales(lastState.imageScales);
       setBackgroundColor(lastState.backgroundColor);
-      setHistory([...history]);
+      setHistory((prev) => prev.slice(0, -1)); // Remove last history item
     }
   };
-
+  
   const redo = () => {
     if (redoStack.length > 0) {
-      const nextState = redoStack.pop();
+      const nextState = redoStack[redoStack.length - 1]; // Get last redo state
       setHistory((prev) => [...prev, { faceColors, faceImages, imagePositions, imageScales, backgroundColor }]);
       setFaceColors(nextState.faceColors);
       setFaceImages(nextState.faceImages);
       setImagePositions(nextState.imagePositions);
       setImageScales(nextState.imageScales);
       setBackgroundColor(nextState.backgroundColor);
-      setRedoStack([...redoStack]);
+      setRedoStack((prev) => prev.slice(0, -1)); // Remove last redo item
     }
   };
+  
 
   if (!SelectedShape) {
     return <h2 className="error-message">Shape not found</h2>;
@@ -116,7 +117,7 @@ const Customization = () => {
   return (
     <div className="app-container" style={{ paddingBottom: "60px" }}>
      <Navbar 
-  shapeType={boxType} 
+  shapeType={boxType}   
   customizationState={{
     faceColors,
     faceImages,
@@ -128,7 +129,7 @@ const Customization = () => {
   zoom={zoom} 
   setZoom={setZoom} 
 />
- <div className="main-content" style={{ paddingBottom: "70px" }}>
+ <div className="main-content" >
         <Sidebar
           selectedFace={selectedFace}
           faceColors={faceColors}
@@ -146,7 +147,7 @@ const Customization = () => {
             setBackgroundColor(color);
           }}
         />
-        <div className="canvas-container" style={{ transform: `scale(${zoom})` }}>
+<div className="canvas-container" style={{ backgroundColor: backgroundColor, transform: `scale(${zoom})` }}>
           <SelectedShape
             selectedFace={selectedFace}
             faceColors={faceColors}

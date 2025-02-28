@@ -106,7 +106,7 @@ const Home = () => {
               <Search className="search-icon" size={20} />
               <input
                 type="text"
-                placeholder="Search Box Mockups                                                                    🔍"
+                placeholder="Search Box Mockups"
                 value={searchQuery}
                 onChange={handleSearch}
                 className="search-input"
