@@ -54,7 +54,7 @@ const VisitorPass = ({ visitorData, printRef }) => {
         }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <img 
-              src="/images/pks.png" 
+              src="/images/pkg.jpg" 
               alt="Parksons Packaging"
               style={{ height: '40px' }}
               crossOrigin="anonymous"

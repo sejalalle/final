@@ -50,7 +50,7 @@ function Footer() {
 
         {/* Footer Text */}
         <p className="text-sm">
-          © Parksons Packaging LTD 2023. All Rights Reserved.
+          © Parksons Packaging LTD 2025. All Rights Reserved.
         </p>
         <p className="text-xs mt-2">
           Designed with ❤️ by Parksons Packaging Team

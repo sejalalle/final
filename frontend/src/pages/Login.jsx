@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Mail } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Login = ({ onLoginSuccess, onSignUpClick, onForgotPasswordClick }) => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -7,6 +8,18 @@ const Login = ({ onLoginSuccess, onSignUpClick, onForgotPasswordClick }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [errors, setErrors] = useState({ email: '', password: '', general: '' });
+
+  const navigate = useNavigate();
+
+  // Default onLoginSuccess function if not provided
+  const handleLoginSuccess = (user) => {
+    console.log('Login successful:', user);
+    localStorage.setItem('token', user.token); // Save token to localStorage
+    navigate('/'); // Redirect to home page
+  };
+
+  // Use the provided onLoginSuccess or the default one
+  const loginSuccessHandler = onLoginSuccess || handleLoginSuccess;
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -17,23 +30,45 @@ const Login = ({ onLoginSuccess, onSignUpClick, onForgotPasswordClick }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
+    // Validate email and password
     if (!validateEmail(formData.email)) {
-      setErrors(prev => ({ ...prev, email: 'Please enter a valid email address' }));
+      setErrors((prev) => ({ ...prev, email: 'Please enter a valid email address' }));
       return;
     }
 
     if (!validatePassword(formData.password)) {
-      setErrors(prev => ({ ...prev, password: 'Password must be at least 8 characters' }));
+      setErrors((prev) => ({ ...prev, password: 'Password must be at least 8 characters' }));
       return;
     }
 
     setIsLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      onLoginSuccess({ ...formData, rememberMe });
+      console.log('Login Form Data:', formData); // Log form data
+
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Login failed');
+      }
+
+      const data = await response.json();
+      console.log('Backend Response:', data); // Log backend response
+
+      if (data.success && data.user) {
+        // Call the login success handler
+        loginSuccessHandler(data.user);
+      } else {
+        throw new Error(data.message || 'Login failed');
+      }
     } catch (error) {
-      setErrors(prev => ({ ...prev, general: 'Login failed. Please try again.' }));
+      console.error('Login failed:', error);
+      setErrors((prev) => ({ ...prev, general: error.message || 'Login failed. Please try again.' }));
     } finally {
       setIsLoading(false);
     }
@@ -41,13 +76,13 @@ const Login = ({ onLoginSuccess, onSignUpClick, onForgotPasswordClick }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    setErrors(prev => ({ ...prev, [name]: '', general: '' }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: '', general: '' }));
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-sky-100 via-violet-100 to-rose-100 mt-20 ">
-      <div className="flex w-full max-w-4xl bg-white/80 backdrop-blur-lg rounded-3xl shadow-xl overflow-hidden border border-white/20 ">
+    <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-sky-100 via-violet-100 to-rose-100 mt-20">
+      <div className="flex w-full max-w-4xl bg-white/80 backdrop-blur-lg rounded-3xl shadow-xl overflow-hidden border border-white/20">
         {/* Left Side - Image */}
         <div className="w-1/2 hidden md:block relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-violet-400/20 via-fuchsia-400/20 to-sky-400/20" />
@@ -177,4 +212,4 @@ const Login = ({ onLoginSuccess, onSignUpClick, onForgotPasswordClick }) => {
   );
 };
 
-export default Login;    
+export default Login;

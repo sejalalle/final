@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'; // useLocation is imported here
 import { ThemeProvider, CssBaseline, createTheme, Container, Box } from '@mui/material';
 import './index.css';
 
@@ -16,8 +16,9 @@ import Innovation from './components/Innovation';
 import Slider from './components/Sliderr';
 import Article1 from './components/Article1';
 import Article2 from './components/Article2';
+import User from './components/User';
 
-//pages
+// Pages
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import ForgotPassword from './pages/ForgetPassword';
@@ -167,6 +168,19 @@ const ProtectedRoute = ({ children }) => {
 
 const App = () => {
   const [currentView, setCurrentView] = useState('login');
+  const location = useLocation(); // useLocation is used here
+
+  // Define routes where Navbar and Footer should NOT appear
+  const noHeaderFooterRoutes = [
+    "/login",
+    "/signup",
+    "/forgot-password",
+    "/visitor-form",
+    "/webcam-capture",
+    "/user"
+  ];
+
+  const hideHeaderFooter = noHeaderFooterRoutes.some((route) => location.pathname.startsWith(route));
 
   const handleSignUpSuccess = (data) => {
     console.log('Sign up successful:', data);
@@ -180,107 +194,88 @@ const App = () => {
 
   const renderAuthView = () => {
     switch (currentView) {
-      case 'login':
-        return (
-          <Login 
-            onSignUpClick={() => setCurrentView('signup')}
-            onForgotPasswordClick={() => setCurrentView('forgotPassword')}
-            onLoginSuccess={handleLoginSuccess}
-          />
-        );
-      case 'signup':
-        return (
-          <SignUp 
-            onBack={() => setCurrentView('login')}
-            onSignUpSuccess={handleSignUpSuccess}
-          />
-        );
-      case 'forgotPassword':
-        return (
-          <ForgotPassword 
-            onBack={() => setCurrentView('login')}
-          />
-        );
-      default:
-        return <Login />;
+      case 'login': return <Login onSignUpClick={() => setCurrentView('signup')} onForgotPasswordClick={() => setCurrentView('forgotPassword')} />;
+      case 'signup': return <SignUp onBack={() => setCurrentView('login')} />;
+      case 'forgotPassword': return <ForgotPassword onBack={() => setCurrentView('login')} />;
+      default: return <Login />;
     }
   };
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Router>
-        <div className="container mx-auto">
-          <Navbar />
-          <Routes>
-            <Route 
-              path="/" 
-              element={
-                <>
-                  <VideoSection />
-                  <Slider/>
-                  <BoxCategories />
-                  <Cards />
-                </>
-              } 
-            />
-            <Route path="/articles/parksons-mk-printpack-announcement" element={<Article1 />} />
-            <Route path="/articles/smart-solutions-for-business" element={<Article2 />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/markets" element={<Markets />} />
-            <Route path="/location" element={<Location />} />
-            <Route path="/innovation" element={<Innovation />} />
-            <Route path="/mockup" element={<Home />} />
-            <Route 
-              path="/login" 
-              element={renderAuthView()} 
-            />
-            
-            {/* Visitor Management routes */}
-            <Route path="/dashboard" element={<Dashboard/>}/>
-            <Route path="/visitor-form" element={
-              <VisitorLayout>
-                <VisitorForm />
-              </VisitorLayout>
-            } />
-            <Route path="/visitor-records" element={
-              <VisitorLayout>
-                <VisitorRecords />
-              </VisitorLayout>
-            } />
-            <Route path="/webcam-capture" element={
-              <VisitorLayout>
-                <WebcamCapture />
-              </VisitorLayout>
-            } />
-            <Route path="/approve-visitor/:visitorId" element={
-              <VisitorLayout>
-                <ApprovalHandler type="approve" />
-              </VisitorLayout>
-            } />
-            <Route path="/reject-visitor/:visitorId" element={
-              <VisitorLayout>
-                <ApprovalHandler type="reject" />
-              </VisitorLayout>
-            } />
+      <div className="container-fluid mx-auto">
+        {!hideHeaderFooter && <Navbar />}
+        <Routes>
+          {/* Authentication Routes */}
+          <Route path="/login" element={renderAuthView()} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/user" element={<User />} />
+          <Route 
+            path="/" 
+            element={
+              <>
+                <VideoSection />
+                <Slider/>
+                <BoxCategories />
+                <Cards />
+              </>
+            } 
+          />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/articles/parksons-mk-printpack-announcement" element={<Article1 />} />
+          <Route path="/articles/smart-solutions-for-business" element={<Article2 />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/markets" element={<Markets />} />
+          <Route path="/location" element={<Location />} />
+          <Route path="/innovation" element={<Innovation />} />
+          <Route path="/mockup" element={<Home />} />
+          
+          {/* Visitor Management routes */}
+          <Route path="/dashboard" element={<Dashboard/>}/>
+          <Route path="/visitor-form" element={
+            <VisitorLayout>
+              <VisitorForm />
+            </VisitorLayout>
+          } />
+          <Route path="/visitor-records" element={
+            <VisitorLayout>
+              <VisitorRecords />
+            </VisitorLayout>
+          } />
+          <Route path="/webcam-capture" element={
+            <VisitorLayout>
+              <WebcamCapture />
+            </VisitorLayout>
+          } />
+          <Route path="/approve-visitor/:visitorId" element={
+            <VisitorLayout>
+              <ApprovalHandler type="approve" />
+            </VisitorLayout>
+          } />
+          <Route path="/reject-visitor/:visitorId" element={
+            <VisitorLayout>
+              <ApprovalHandler type="reject" />
+            </VisitorLayout>
+          } />
 
-            {/* Mockup routes */}
-            <Route path="/mockup" element={
-              <MockupLayout>
-                <Home />
-              </MockupLayout>
-            } />
-            <Route path="/mockup/customization/:boxType" element={
-              <MockupLayout>
-                <Customization />
-              </MockupLayout>
-            } />
-            {/* Catch-all route for unknown paths */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-          <Footer />
-        </div>
-      </Router>
+          {/* Mockup routes */}
+          <Route path="/mockup" element={
+            <MockupLayout>
+              <Home />
+            </MockupLayout>
+          } />
+          <Route path="/mockup/customization/:boxType" element={
+            <MockupLayout>
+              <Customization />
+            </MockupLayout>
+          } />
+          {/* Catch-all route for unknown paths */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+        {!hideHeaderFooter && <Footer />}
+      </div>
     </ThemeProvider>
   );
 };

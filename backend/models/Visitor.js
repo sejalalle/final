@@ -11,6 +11,7 @@ const VisitorSchema = new mongoose.Schema({
     department: { type: String, required: true },
     contactPerson: { type: String, required: true },
     idNumber: { type: String, required: true },
+    count: { type: Number, default: 0 },
 });
 
 module.exports = mongoose.model('Visitor', VisitorSchema);

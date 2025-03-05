@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { FaUserCircle, FaShoppingCart, FaBars, FaSearch, FaTimes } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { useLocation } from 'react-router-dom';
+import { Link } from "react-router-dom";
+
+
 
 function Navbar() {
   const [isSticky, setIsSticky] = useState(false);
@@ -12,6 +16,9 @@ function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const navigate = useNavigate();
+
+  const location = useLocation();
+  const username = location.state?.username || 'Guest'; 
 
   const handleScroll = () => {
     const currentScrollY = window.scrollY;
@@ -119,13 +126,10 @@ function Navbar() {
 
   return (
     <div className="w-full">
+      
       <div className="bg-green-300 h-2"></div>
-      <div className="bg-red-500 text-white p-4">Tailwind is Working</div>
-
       <nav
-        className={`${
-          isSticky ? "fixed" : "absolute"
-        } top-0 left-0 w-full z-20 bg-white shadow-md transition-all duration-300`}
+        className="fixed top-0 left-0 w-full z-20 bg-white shadow-md"
       >
         {/* Top navbar section */}
         <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 py-4">
@@ -175,22 +179,28 @@ function Navbar() {
             
             <div className="hidden md:flex items-center space-x-6 text-2xl text-black">
               <a href="/login" className="flex items-center space-x-2 text-gray-700">
-                <FaUserCircle />
+               
                 <span className="text-sm font-medium">Login</span>
               </a>
               <a href="/cart" className="text-gray-700">
                 <FaShoppingCart />
               </a>
+             
+              <Link to="/user" className="flex items-center space-x-2 text-gray-700">
+                 <FaUserCircle />
+                  </Link>
+                
+            
             </div>
             
-            <div className="md:hidden flex items-center space-x-4 text-xl text-black">
-              <a href="/login" className="text-gray-700">
+            {/* <div className="md:hidden flex items-center space-x-4 text-xl text-black">
+              <a href="/user" className="text-gray-700">
                 <FaUserCircle />
               </a>
               <a href="/cart" className="text-gray-700">
                 <FaShoppingCart />
               </a>
-            </div>
+            </div> */}
             
             <button 
               className="md:hidden text-gray-700" 
