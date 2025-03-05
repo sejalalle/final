@@ -1,5 +1,9 @@
 const express = require('express');
+<<<<<<< HEAD
 const bcrypt = require('bcryptjs'); // Updated to bcryptjs
+=======
+const bcrypt = require('bcrypt');
+>>>>>>> dc6d9be (More things fixed)
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const router = express.Router();
@@ -15,8 +19,13 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ success: false, message: 'User already exists' });
     }
 
+<<<<<<< HEAD
     // Hash password using bcryptjs
     const hashedPassword = await bcrypt.hashSync(password, 10); // Use hashSync for synchronous hashing
+=======
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+>>>>>>> dc6d9be (More things fixed)
 
     // Create new user
     const user = new User({ fullName, email, password: hashedPassword, role });
@@ -40,8 +49,13 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid email or password' });
     }
 
+<<<<<<< HEAD
     // Validate password using bcryptjs
     const isPasswordValid = await bcrypt.compareSync(password, user.password); // Use compareSync for synchronous comparison
+=======
+    // Validate password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+>>>>>>> dc6d9be (More things fixed)
     if (!isPasswordValid) {
       return res.status(400).json({ success: false, message: 'Invalid email or password' });
     }

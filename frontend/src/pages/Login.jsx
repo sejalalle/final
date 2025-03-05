@@ -15,6 +15,7 @@ const Login = ({ onLoginSuccess, onSignUpClick, onForgotPasswordClick }) => {
   const handleLoginSuccess = (user) => {
     console.log('Login successful:', user);
     localStorage.setItem('token', user.token); // Save token to localStorage
+<<<<<<< HEAD
 
     // Redirect based on user role
     if (user.role === 'visitor') {
@@ -22,6 +23,9 @@ const Login = ({ onLoginSuccess, onSignUpClick, onForgotPasswordClick }) => {
     } else {
       navigate('/'); // Redirect to dashboard for other roles
     }
+=======
+    navigate('/'); // Redirect to home page
+>>>>>>> dc6d9be (More things fixed)
   };
 
   // Use the provided onLoginSuccess or the default one
