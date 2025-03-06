@@ -4,6 +4,7 @@ const GitHubStrategy = require("passport-github2").Strategy;
 const LocalStrategy = require("passport-local").Strategy;
 const User = require("../models/User");
 
+
 // ✅ Serialize user (store user ID in session)
 passport.serializeUser((user, done) => {
   done(null, user.id);
