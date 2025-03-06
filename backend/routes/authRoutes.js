@@ -1,5 +1,5 @@
 const express = require('express');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs'); // Updated to bcryptjs
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const router = express.Router();
@@ -15,8 +15,8 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ success: false, message: 'User already exists' });
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Hash password using bcryptjs
+    const hashedPassword = await bcrypt.hashSync(password, 10); // Use hashSync for synchronous hashing
 
     // Create new user
     const user = new User({ fullName, email, password: hashedPassword, role });
@@ -40,8 +40,8 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid email or password' });
     }
 
-    // Validate password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    // Validate password using bcryptjs
+    const isPasswordValid = await bcrypt.compareSync(password, user.password); // Use compareSync for synchronous comparison
     if (!isPasswordValid) {
       return res.status(400).json({ success: false, message: 'Invalid email or password' });
     }
