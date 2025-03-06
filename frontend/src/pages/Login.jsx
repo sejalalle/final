@@ -15,7 +15,13 @@ const Login = ({ onLoginSuccess, onSignUpClick, onForgotPasswordClick }) => {
   const handleLoginSuccess = (user) => {
     console.log('Login successful:', user);
     localStorage.setItem('token', user.token); // Save token to localStorage
-    navigate('/'); // Redirect to home page
+
+    // Redirect based on user role
+    if (user.role === 'visitor') {
+      navigate('/dashboard'); // Redirect to home page for visitors
+    } else {
+      navigate('/'); // Redirect to dashboard for other roles
+    }
   };
 
   // Use the provided onLoginSuccess or the default one
