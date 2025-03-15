@@ -59,7 +59,7 @@ const FlipTopBox = ({
   return (
     <group>
       <mesh ref={boxRef} onPointerDown={handleFaceClick}>
-        <boxGeometry args={[2, 2, 2]} />
+        <boxGeometry args={[4.5, 1.5, 2.5]} />
         {materials.map((materialSet, index) =>
           materialSet.map((material, subIndex) => (
             <primitive key={`${index}-${subIndex}`} attach={`material-${index}`} object={material} />
@@ -80,7 +80,7 @@ const FlipTopBoxRenderer = ({
 }) => {
   return (
     <div className="w-full h-full">
-      <Canvas camera={{ position: [3, 3, 3] }}>
+      <Canvas camera={{ position: [3, 3, 5] }}>
         <ambientLight intensity={0.5} />
         <directionalLight position={[5, 5, 5]} intensity={1} />
         <FlipTopBox

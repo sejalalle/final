@@ -95,44 +95,73 @@ function BoxCategories() {
           </div>
         </div>
       </div>
-      {/* Enhanced Statistics Section */}
-<div className="bg-gradient-to-r from-blue-50 to-pink-50 py-20 mt-16 relative overflow-hidden">
-  {/* Decorative Background Elements */}
-  <div className="absolute top-0 left-0 w-80 h-80 bg-pink-100 opacity-30 rounded-full transform -translate-x-1/3 -translate-y-1/3"></div>
-  <div className="absolute bottom-0 right-0 w-80 h-80 bg-blue-100 opacity-30 rounded-full transform translate-x-1/3 translate-y-1/3"></div>
+      {/* Enhanced Statistics Section with Advanced Design */}
+<div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-pink-50 py-24 mt-16 relative overflow-hidden">
+  {/* Animated Decorative Background Elements */}
+  <div className="absolute top-0 left-0 w-96 h-96 bg-pink-100 opacity-40 rounded-full blur-2xl transform -translate-x-1/3 -translate-y-1/3 animate-pulse"></div>
+  <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-100 opacity-40 rounded-full blur-2xl transform translate-x-1/3 translate-y-1/3 animate-pulse" style={{ animationDelay: "2s" }}></div>
+  <div className="absolute top-1/2 right-1/4 w-64 h-64 bg-purple-100 opacity-30 rounded-full blur-xl transform -translate-y-1/2 animate-pulse" style={{ animationDelay: "1s" }}></div>
+  
+  {/* Subtle Pattern Overlay */}
+  <div className="absolute inset-0 opacity-10" style={{
+    backgroundImage: "radial-gradient(circle, #6366f1 1px, transparent 1px)",
+    backgroundSize: "30px 30px"
+  }}></div>
 
   <div className="relative z-10 max-w-7xl mx-auto px-6">
-    {/* Title */}
-    <h2 className="text-4xl font-bold text-center text-gray-800">
-      Why Choose Us?
-    </h2>
-    <p className="text-center mt-4 text-gray-600 text-lg">
-      Trusted by businesses worldwide, we deliver excellence and innovation in every solution.
-    </p>
+    {/* Enhanced Title Section */}
+    <div className="text-center mb-16">
+      <h2 className="text-5xl font-bold text-center text-gray-800 relative inline-block">
+        Why Choose Us?
+        <span className="absolute -bottom-3 left-0 w-full h-1 bg-gradient-to-r from-pink-400 to-indigo-500 rounded-full"></span>
+      </h2>
+      <p className="text-center mt-6 text-gray-600 text-xl max-w-3xl mx-auto leading-relaxed">
+        Trusted by businesses worldwide, we deliver excellence and innovation in every solution.
+      </p>
+    </div>
 
-    {/* Statistics Cards */}
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mt-12 text-center">
+    {/* Statistics Cards with Enhanced Design */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mt-12 text-center">
       {[
-        { number: "30+", label: "Years of Experience" },
-        { number: "500+", label: "Clients Served" },
-        { number: "10M+", label: "Eco-Friendly Products Delivered" },
-        { number: "100%", label: "Sustainable Packaging Solutions" },
+        { 
+          number: "30+", 
+          label: "Years of Experience",
+          icon: "⏳"
+        },
+        { 
+          number: "500+", 
+          label: "Clients Served",
+          icon: "🤝"
+        },
+        { 
+          number: "10M+", 
+          label: "Eco-Friendly Products Delivered",
+          icon: "🌱"
+        },
+        { 
+          number: "100%", 
+          label: "Sustainable Packaging Solutions",
+          icon: "♻️"
+        },
       ].map((stat, index) => (
         <div
           key={index}
-          className="relative group bg-white rounded-2xl shadow-md p-8 hover:shadow-xl transform transition-all duration-500 hover:scale-105"
+          className="relative group bg-white bg-opacity-80 backdrop-filter backdrop-blur-sm rounded-2xl shadow-lg p-10 hover:shadow-2xl transform transition-all duration-500 hover:-translate-y-2 border border-gray-100"
         >
-          {/* Circular Accent Element */}
-          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-400 rounded-full shadow-md">
-            <span className="text-white text-2xl font-bold">{index + 1}</span>
+          {/* Top Accent Bar */}
+          <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-indigo-500 to-pink-500 rounded-t-2xl transform origin-left transition-all duration-500 group-hover:scale-x-100"></div>
+          
+          {/* Circular Icon Element */}
+          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-500 to-pink-400 rounded-full shadow-lg group-hover:rotate-12 transition-all duration-500">
+            <span className="text-white text-2xl">{stat.icon}</span>
           </div>
 
-          {/* Number */}
-          <h3 className="text-5xl font-extrabold text-indigo-600 group-hover:text-pink-600 transition duration-300 mt-6">
+          {/* Number with Animation */}
+          <h3 className="text-5xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-pink-400 transition duration-300 mt-6 group-hover:scale-110 transform">
             {stat.number}
           </h3>
 
-          {/* Label */}
+          {/* Label with Enhanced Typography */}
           <p className="text-lg font-medium text-gray-700 mt-3 group-hover:text-gray-900 transition duration-300">
             {stat.label}
           </p>
@@ -140,10 +169,11 @@ function BoxCategories() {
       ))}
     </div>
 
-    {/* Call-to-Action */}
-    <div className="mt-12 flex justify-center">
-      <button className="px-8 py-3 bg-pink-500 text-white font-semibold rounded-lg shadow-lg hover:bg-pink-600 transition">
+    {/* Enhanced Call-to-Action */}
+    <div className="mt-16 flex justify-center">
+      <button className="px-10 py-4 bg-gradient-to-r from-indigo-500 to-pink-400 text-white font-semibold text-lg rounded-full shadow-xl hover:shadow-2xl transform transition-all duration-300 hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-opacity-50">
         Explore Our Solutions
+        <span className="ml-2">→</span>
       </button>
     </div>
   </div>
@@ -153,62 +183,73 @@ function BoxCategories() {
   <h2 className="text-center text-4xl font-bold text-gray-800 mb-12 mt-40">
     Our Mission, Vision, and Values
   </h2>
-
+  
   {/* Grid Container */}
   <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-7xl">
     {[
-        {
-          title: "MISSION",
-          color: "bg-blue-300",
-          content:
-            "Our mission is to provide high-quality, sustainable, and innovative packaging solutions tailored to our customers' needs.",
-          icon: "\u{1F4AC}", // 💬 Speech Balloon
-        },
-        {
-          title: "VISION",
-          color: "bg-red-300",
-          content:
-            "Our vision is to become the global leader in eco-friendly packaging, setting industry standards for innovation and sustainability.",
-          icon: "\u{1F50D}", // 🔍 Magnifying Glass
-        },
-        {
-          title: "VALUES",
-          color: "bg-orange-300",
-          content:
-            "We value integrity, customer satisfaction, and environmental responsibility in every step of our production and service.",
-          icon: "\u{1F48E}", // 💎 Diamond
-        },
+      {
+        title: "MISSION",
+        backgroundImage: "url('https://t4.ftcdn.net/jpg/05/12/63/47/360_F_512634787_zQMiBUWKSwbG6wFeXjQSGVfXSRtT4CwQ.jpg')",
+        content:
+          "Our mission is to provide high-quality, sustainable, and innovative packaging solutions tailored to our customers' needs.",
+        icon: "\u{1F4AC}", // 💬 Speech Balloon
+      },
+      {
+        title: "VISION",
+        backgroundImage: "url('https://www.creativefabrica.com/wp-content/uploads/2021/11/27/Pure-Red-Watercolor-Background-Graphics-20858011-1-1-580x387.jpg')",
+        content:
+          "Our vision is to become the global leader in eco-friendly packaging, setting industry standards for innovation and sustainability.",
+        icon: "\u{1F50D}", // 🔍 Magnifying Glass
+      },
+      {
+        title: "VALUES",
+        backgroundImage: "url('https://t4.ftcdn.net/jpg/05/41/22/89/360_F_541228984_HZuJBpSlGDvgEixl4lINXRb1uuJWdh6G.jpg')",
+        content:
+          "We value integrity, customer satisfaction, and environmental responsibility in every step of our production and service.",
+        icon: "\u{1F48E}", // 💎 Diamond
+      },
     ].map((item, index) => (
-      <div 
-        key={index} 
+      <div
+        key={index}
         className="relative bg-white shadow-lg rounded-lg overflow-hidden transition-transform duration-300 ease-in-out hover:shadow-2xl hover:-translate-y-2"
       >
-       {/* Top Section with Color */}
-       <div className={`${item.color} h-52 flex justify-center items-center relative`}>
-              {/* Hexagon with Icon */}
-              <div
-                className="absolute -bottom-10 flex items-center justify-center text-4xl font-bold text-gray-800"
-                style={{
-                  width: "90px",
-                  height: "78px",
-                  clipPath: "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)",
-                  backgroundColor: "white",
-                }}
-              >
-                <span>{item.icon}</span> {/* Ensures correct rendering */}
-              </div>
-            </div>
+        {/* Top Section with Background Image - No Shadow Overlay */}
+        <div 
+          className="h-52 flex justify-center items-center relative" 
+          style={{
+            backgroundImage: item.backgroundImage,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
+        >
+          {/* Title with text shadow for readability without background overlay */}
+          <h3 className="text-white text-2xl font-bold relative z-10 text-shadow"
+              style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.7)" }}>
+            {item.title}
+          </h3>
+          
+          {/* Hexagon with Icon */}
+          <div
+            className="absolute -bottom-10 flex items-center justify-center text-4xl font-bold text-gray-800 shadow-lg"
+            style={{
+              width: "90px",
+              height: "78px",
+              clipPath: "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)",
+              backgroundColor: "white",
+            }}
+          >
+            <span>{item.icon}</span>
+          </div>
+        </div>
 
-        {/* Text Content */}
-        <div className="pt-12 pb-10 px-6 text-center">
-          <h3 className="text-2xl font-bold text-gray-800">{item.title}</h3>
-          <p className="mt-4 text-gray-600">{item.content}</p>
+        {/* Content Section */}
+        <div className="px-6 py-12 pt-16">
+          <p className="text-gray-700 text-center">{item.content}</p>
         </div>
       </div>
     ))}
   </div>
 </div>
-
     </section>
   );
 }

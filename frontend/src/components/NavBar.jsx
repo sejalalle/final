@@ -1,8 +1,11 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { exportDieline } from "../Mockup/utils/ExportUtils"; 
 import "./NavBar.css";
 
 const Navbar = ({ selectedFace, undo, redo, zoom, setZoom, shapeType, customizationState }) => {
+  const navigate = useNavigate();
+
   const handleZoom = (direction) => {
     setZoom((prev) => {
       const newZoom = direction === "in" ? prev + 0.1 : prev - 0.1;
@@ -18,6 +21,15 @@ const Navbar = ({ selectedFace, undo, redo, zoom, setZoom, shapeType, customizat
     exportDieline(shapeType, customizationState);
   };
 
+  const handleAddToCart = () => {
+    if (!shapeType) {
+      alert("No shape selected!");
+      return;
+    }
+
+    navigate("/cart", { state: { shapeType } }); // ✅ Pass only shape type
+  };
+
   return (
     <div className="navbar">
       <div className="nav-left">
@@ -25,16 +37,15 @@ const Navbar = ({ selectedFace, undo, redo, zoom, setZoom, shapeType, customizat
         <button onClick={redo}>⏩ Redo</button>
       </div>
 
-      {/* <div className="nav-center">
-        🎨 Editing: {selectedFace !== null ? `Face ${selectedFace}` : "None"}
-      </div> */}
-
       <div className="nav-right">
         <button onClick={() => handleZoom("out")}>➖</button>
         <span>{(zoom * 100).toFixed(0)}%</span>
         <button onClick={() => handleZoom("in")}>➕</button>
         <button className="export-btn" onClick={handleExport} disabled={!shapeType}>
           🚀 Export
+        </button>
+        <button className="add-to-cart-btn" onClick={handleAddToCart}>
+          🛒 Add to Cart
         </button>
       </div>
     </div>

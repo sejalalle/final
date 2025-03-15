@@ -1,302 +1,302 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Camera } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
 
 const User = () => {
-  // Sample activity data
-  const initialActivities = [
-    {
-      id: 1,
-      type: 'task',
-      title: 'Completed dashboard redesign',
-      project: 'Marketing Website',
-      date: new Date(2025, 1, 24, 14, 30),
-      description: 'Finalized the new dashboard layout with improved analytics visualization'
-    },
-    {
-      id: 2,
-      type: 'comment',
-      title: 'Commented on a task',
-      project: 'Mobile App',
-      date: new Date(2025, 1, 24, 10, 15),
-      description: 'I think we should use a card-based layout for the feed to improve scannability'
-    },
-    {
-      id: 3,
-      type: 'project',
-      title: 'Created new project',
-      project: 'Customer Portal',
-      date: new Date(2025, 1, 23, 16, 45),
-      description: 'Started a new project for redesigning the customer self-service portal'
-    },
-    {
-      id: 4,
-      type: 'task',
-      title: 'Updated user flows',
-      project: 'Mobile App',
-      date: new Date(2025, 1, 22, 9, 0),
-      description: 'Revised user flows based on latest user testing feedback'
-    },
-    {
-      id: 5,
-      type: 'comment',
-      title: 'Commented on a design',
-      project: 'Design System',
-      date: new Date(2025, 1, 21, 11, 30),
-      description: 'The new button design looks great, but I think we need to adjust the padding'
+  const [isLoggedIn, setIsLoggedIn] = useState(true); // Set to true for demonstration
+  const [user, setUser] = useState({
+    firstName: 'Sejal',
+    lastName: 'Alle',
+    email: 'allesejal@gmail.com',
+    phone: '+91 8099328668',
+    profileImage: '/api/placeholder/150/150'
+  });
+  const [showPhotoOptions, setShowPhotoOptions] = useState(false);
+  const [showWebcam, setShowWebcam] = useState(false);
+  const [stream, setStream] = useState(null);
+  const fileInputRef = useRef(null);
+  const videoRef = useRef(null);
+  const photoRef = useRef(null);
+  
+  // Clean up webcam stream when component unmounts
+  useEffect(() => {
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [stream]);
+  
+  const handleSignOut = () => {
+    setIsLoggedIn(false);
+  };
+  
+  const handleProfileImageClick = () => {
+    if (isLoggedIn) {
+      setShowPhotoOptions(!showPhotoOptions);
     }
-  ];
-
-  // State for activities and filter
-  const [activities, setActivities] = useState(initialActivities);
-  const [filter, setFilter] = useState('All Activity');
-  const [visibleActivities, setVisibleActivities] = useState(3);
-
-  // Filter activities based on selected filter
-  const filteredActivities = filter === 'All Activity' 
-    ? activities 
-    : activities.filter(activity => activity.type === filter.toLowerCase().slice(0, -1));
-
-  // Handle load more button click
-  const handleLoadMore = () => {
-    setVisibleActivities(prev => Math.min(prev + 3, filteredActivities.length));
+  };
+  
+  const handleTakePhoto = async () => {
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      setStream(mediaStream);
+      setShowWebcam(true);
+      setShowPhotoOptions(false);
+    } catch (err) {
+      console.error("Error accessing webcam:", err);
+      alert("Could not access webcam. Please check permissions.");
+    }
+  };
+  
+  const handleUploadPhoto = () => {
+    fileInputRef.current.click();
+    setShowPhotoOptions(false);
+  };
+  
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setUser({...user, profileImage: event.target.result});
+      };
+      reader.readAsDataURL(e.target.files[0]);
+    }
+  };
+  
+  useEffect(() => {
+    if (videoRef.current && stream) {
+      videoRef.current.srcObject = stream;
+    }
+  }, [stream, showWebcam]);
+  
+  const handleCaptureWebcam = () => {
+    if (videoRef.current && photoRef.current) {
+      const videoElement = videoRef.current;
+      const canvas = photoRef.current;
+      
+      // Set canvas dimensions to match video
+      canvas.width = videoElement.videoWidth;
+      canvas.height = videoElement.videoHeight;
+      
+      // Draw video frame to canvas
+      const context = canvas.getContext('2d');
+      context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+      
+      // Convert canvas to data URL
+      const photoDataUrl = canvas.toDataURL('image/png');
+      
+      // Update profile image
+      setUser({...user, profileImage: photoDataUrl});
+      
+      // Clean up
+      stream.getTracks().forEach(track => track.stop());
+      setStream(null);
+      setShowWebcam(false);
+    }
+  };
+  
+  const closeWebcam = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+    }
+    setStream(null);
+    setShowWebcam(false);
   };
 
-  // Format date with relative time (today, yesterday, or date)
-  const formatDate = (date) => {
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
+  const logout = () => {
+    localStorage.removeItem("isLoggedIn"); // Remove the login status
+    setIsLoggedIn(false); // Update state to reflect logout
+ 
+  };
+  const navigate = useNavigate();
+
+
+  
+  
+  if (!isLoggedIn) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+          <h2 className="text-3xl font-bold text-center mb-6 text-indigo-800">Please Login</h2>
+          <p className="text-center mb-6 text-gray-600">You need to be logged in to view your profile.</p>
+          <button
+          className="w-full bg-indigo-600 text-white py-3 rounded-md hover:bg-indigo-700 transition-colors duration-300 font-medium text-lg"
+          onClick={() => navigate('/login')}
+        >
+          Login
+        </button>
     
-    if (date >= today) {
-      return `Today at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })};`
-    } else if (date >= yesterday) {
-      return `Yesterday at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })};`
-    } else {
-      return date.toLocaleDateString([], { month: 'short', day: 'numeric' }) + 
-        ` at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-    }
-  };
-
-  // Activity icon based on type
-  const ActivityIcon = ({ type }) => {
-    switch(type) {
-      case 'task':
-        return (
-          <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
-            <svg className="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
-            </svg>
-          </div>
-        );
-      case 'comment':
-        return (
-          <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-            <svg className="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-            </svg>
-          </div>
-        );
-      case 'project':
-        return (
-          <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
-            <svg className="h-5 w-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
-            </svg>
-          </div>
-        );
-      default:
-        return (
-          <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
-            <svg className="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-            </svg>
-          </div>
-        );
-    }
-  };
-
+        </div>
+      </div>
+    );
+  }
+  
   return (
-    <div className="bg-gray-100 min-h-screen">
-      {/* Navigation */}
-      <nav className="bg-white shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex">
-              <div className="flex-shrink-0 flex items-center">
-                {/* Logo placeholder */}
-                <div className="h-8 w-8 bg-indigo-600 rounded-full"></div>
-                <span className="ml-2 font-bold text-lg">ProfileHub</span>
-              </div>
-            </div>
-            <div className="flex items-center">
-              <div className="flex items-center space-x-4">
-                <button className="text-gray-500 hover:text-gray-700">
-                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-                  </svg>
-                </button>
-                <div className="flex items-center">
-                  <img className="h-8 w-8 rounded-full" src="/api/placeholder/32/32" alt="User avatar" />
-                  <span className="ml-2 font-medium">John Doe</span>
-                </div>
-              </div>
-            </div>
-          </div>
+    <div className="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen p-8">
+      <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-8 relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute top-0 right-0 opacity-10 pointer-events-none">
+          <svg width="400" height="400" viewBox="0 0 100 100">
+            <circle cx="75" cy="25" r="20" fill="currentColor" className="text-indigo-500" />
+            <circle cx="80" cy="80" r="30" fill="currentColor" className="text-blue-400" />
+            <path d="M10 90 Q 50 10, 90 90" fill="none" stroke="currentColor" strokeWidth="2" className="text-indigo-600" />
+          </svg>
         </div>
-      </nav>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        {/* Profile Header */}
-        <div className="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
-          <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
-            <div className="flex items-center">
-              <img className="h-16 w-16 rounded-full" src="/api/placeholder/64/64" alt="User profile" />
-              <div className="ml-4">
-                <h1 className="text-2xl font-bold text-gray-900">John Doe</h1>
-                <p className="text-sm text-gray-500">@johndoe • Joined Jan 2023</p>
-              </div>
-            </div>
-            <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-              Edit Profile
-            </button>
-          </div>
-          <div className="border-t border-gray-200">
-            <dl>
-              <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt className="text-sm font-medium text-gray-500">
-                  Email address
-                </dt>
-                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  john.doe@example.com
-                </dd>
-              </div>
-              <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt className="text-sm font-medium text-gray-500">
-                  Location
-                </dt>
-                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  San Francisco, CA
-                </dd>
-              </div>
-              <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt className="text-sm font-medium text-gray-500">
-                  Bio
-                </dt>
-                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  Product designer and developer passionate about creating intuitive user experiences.
-                </dd>
-              </div>
-            </dl>
-          </div>
-        </div>
-
-        {/* Stats Summary */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-4 mb-6">
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <dt className="text-sm font-medium text-gray-500 truncate">Customized Boxes</dt>
-              <dd className="mt-1 text-3xl font-semibold text-gray-900">142</dd>
+        
+        <div className="flex flex-col md:flex-row relative z-10">
+          {/* Sidebar */}
+          <div className="md:w-1/4 border-b md:border-b-0 md:border-r border-indigo-100 pb-6 mb-6 md:pb-0 md:mb-0 md:pr-8">
+            <h2 className="font-bold text-xl text-indigo-800 mb-6">User Profile</h2>
+            <ul className="space-y-4">
+              <li className="text-gray-700 hover:text-indigo-600 transition-colors cursor-pointer font-medium">Orders</li>
+              <li className="text-gray-700 hover:text-indigo-600 transition-colors cursor-pointer font-medium">Subscriptions</li>
+              <li className="text-gray-700 hover:text-indigo-600 transition-colors cursor-pointer font-medium">Address</li>
+              <li className="text-gray-700 hover:text-indigo-600 transition-colors cursor-pointer font-medium">Payments</li>
+              <li className="text-gray-700 hover:text-indigo-600 transition-colors cursor-pointer font-medium">Wishlist</li>
+            </ul>
+            <div className="mt-12">
+              <button 
+                onClick={logout}
+                className="flex items-center text-red-500 hover:text-red-700 transition-colors font-medium"
+              >
+                <span className="mr-2">⟵</span> Sign out
+              </button>
             </div>
           </div>
-
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <dt className="text-sm font-medium text-gray-500 truncate">Add To cart</dt>
-              <dd className="mt-1 text-3xl font-semibold text-gray-900">89</dd>
+          
+          {/* Main Content */}
+          <div className="md:w-3/4 md:pl-8">
+            <div className="mb-8">
+              <h1 className="text-2xl font-bold text-indigo-800">User Profile</h1>
+              <p className="text-gray-600">Manage your details, view your tier status and change your password.</p>
             </div>
-          </div>
-
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <dt className="text-sm font-medium text-gray-500 truncate">Comments</dt>
-              <dd className="mt-1 text-3xl font-semibold text-gray-900">37</dd>
-            </div>
-          </div>
-
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <dt className="text-sm font-medium text-gray-500 truncate">My Order</dt>
-              <dd className="mt-1 text-3xl font-semibold text-gray-900">412</dd>
-            </div>
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="border-b border-gray-200 mb-6">
-          <nav className="-mb-px flex">
-            <a href="#" className="border-indigo-500 text-indigo-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" aria-current="page">
-              Activity
-            </a>
-            <a href="#" className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ml-8">
-              Projects
-            </a>
-            <a href="#" className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ml-8">
-              Teams
-            </a>
-            <a href="#" className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ml-8">
-              Settings
-            </a>
-          </nav>
-        </div>
-
-        {/* Activity Filter */}
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-medium text-gray-900">Activity History</h2>
-          <div className="relative inline-flex shadow-sm rounded-md">
-            <select 
-              className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-              value={filter}
-              onChange={(e) => {
-                setFilter(e.target.value);
-                setVisibleActivities(3);
-              }}
-            >
-              <option>All Activity</option>
-              <option>Tasks</option>
-              <option>Comments</option>
-              <option>Projects</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Activity Timeline */}
-        <div className="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
-          <ul className="divide-y divide-gray-200">
-            {filteredActivities.slice(0, visibleActivities).map((activity) => (
-              <li key={activity.id} className="p-4 hover:bg-gray-50">
-                <div className="flex space-x-3">
-                  <ActivityIcon type={activity.type} />
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-medium">{activity.title}</h3>
-                      <p className="text-sm text-gray-500">{formatDate(activity.date)}</p>
-                    </div>
-                    <p className="text-sm text-gray-500">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 mr-2">
-                        {activity.project}
-                      </span>
-                      {activity.description}
-                    </p>
+            
+            {/* Profile Image and Name */}
+            <div className="flex flex-col sm:flex-row items-center mb-12">
+              <div className="relative group">
+                <div 
+                  className="w-32 h-32 rounded-full bg-gradient-to-br from-indigo-400 to-blue-500 p-1 overflow-hidden cursor-pointer shadow-lg"
+                  onClick={handleProfileImageClick}
+                >
+                  <img 
+                    src={user.profileImage} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-30 opacity-0 group-hover:opacity-100 flex items-center justify-center rounded-full transition-opacity">
+                    <Camera size={32} className="text-white" />
                   </div>
                 </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Load More Button */}
-        {visibleActivities < filteredActivities.length && (
-          <div className="flex justify-center">
-            <button 
-              onClick={handleLoadMore}
-              className="mt-4 bg-white hover:bg-gray-50 text-indigo-600 font-medium py-2 px-4 border border-gray-300 rounded-md shadow-sm"
-            >
-              Load More Activity
-            </button>
+                {showPhotoOptions && (
+                  <div className="absolute top-full left-0 mt-4 bg-white shadow-xl rounded-lg p-3 w-56 z-10 border border-indigo-100">
+                    <button 
+                      onClick={handleTakePhoto}
+                      className="block w-full text-left px-4 py-3 hover:bg-indigo-50 rounded-md text-indigo-700 font-medium"
+                    >
+                      Take photo
+                    </button>
+                    <button 
+                      onClick={handleUploadPhoto}
+                      className="block w-full text-left px-4 py-3 hover:bg-indigo-50 rounded-md text-indigo-700 font-medium"
+                    >
+                      Upload photo
+                    </button>
+                    <input 
+                      type="file" 
+                      ref={fileInputRef} 
+                      onChange={handleFileChange} 
+                      className="hidden" 
+                      accept="image/*"
+                    />
+                  </div>
+                )}
+              </div>
+              <div className="mt-4 sm:mt-0 sm:ml-6 text-center sm:text-left">
+                <h2 className="text-2xl font-bold text-gray-800">{user.firstName} {user.lastName}</h2>
+                <p className="text-indigo-600 text-lg">{user.phone}</p>
+              </div>
+            </div>
+            
+            {/* Webcam Modal */}
+            {showWebcam && (
+              <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+                <div className="bg-white p-6 rounded-xl max-w-2xl w-full shadow-2xl">
+                  <h3 className="text-2xl font-bold mb-4 text-indigo-800">Take a Profile Photo</h3>
+                  <div className="bg-gray-900 rounded-lg overflow-hidden mb-6">
+                    <video 
+                      ref={videoRef}
+                      autoPlay
+                      className="w-full h-full"
+                    />
+                    <canvas ref={photoRef} className="hidden" />
+                  </div>
+                  <div className="flex justify-between">
+                    <button 
+                      onClick={closeWebcam}
+                      className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 font-medium"
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      onClick={handleCaptureWebcam}
+                      className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium"
+                    >
+                      Capture Photo
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* General Information */}
+            <div className="border border-indigo-100 rounded-xl p-8 mb-8 bg-white shadow-md hover:shadow-lg transition-shadow">
+              <h3 className="text-xl font-bold mb-6 text-indigo-800">General Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                  <p className="text-gray-500 mb-1">First name</p>
+                  <p className="text-lg font-medium">{user.firstName}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500 mb-1">Last name</p>
+                  <p className="text-lg font-medium">{user.lastName}</p>
+                </div>
+              </div>
+              <button className="mt-6 px-6 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors font-medium">
+                Update
+              </button>
+            </div>
+            
+            {/* Security Section */}
+            <div className="border border-indigo-100 rounded-xl p-8 bg-white shadow-md hover:shadow-lg transition-shadow">
+              <h3 className="text-xl font-bold mb-6 text-indigo-800">Security</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                <div>
+                  <p className="text-gray-500 mb-1">Email</p>
+                  <p className="text-lg font-medium">{user.email}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500 mb-1">Password</p>
+                  <p className="text-lg font-medium">••••••</p>
+                </div>
+                <div>
+                  <p className="text-gray-500 mb-1">Phone number</p>
+                  <p className="text-lg font-medium">{user.phone}</p>
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                <button className="px-6 py-3 border border-indigo-300 rounded-lg text-indigo-700 hover:bg-indigo-50 transition-colors font-medium">
+                  Change password
+                </button>
+                <button className="px-6 py-3 border border-indigo-300 rounded-lg text-indigo-700 hover:bg-indigo-50 transition-colors font-medium">
+                  Change phone number
+                </button>
+              </div>
+            </div>
           </div>
-        )}
-      </main>
+        </div>
+      </div>
     </div>
   );
 };

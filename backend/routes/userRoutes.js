@@ -19,7 +19,6 @@ router.get('/profile', getUserProfile);
 router.put('/profile', updateUserProfile);
 
 // Admin routes
-router.use(authorize('admin'));
 router.get('/', getAllUsers);
 router.get('/:id', getUserById);
 router.put('/:id', updateUser);

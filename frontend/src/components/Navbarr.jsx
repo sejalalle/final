@@ -1,24 +1,44 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FaUserCircle, FaShoppingCart, FaBars, FaSearch, FaTimes } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
-import { useLocation } from 'react-router-dom';
-import { Link } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 
-
-
-function Navbar() {
+function Navbarr() {
   const [isSticky, setIsSticky] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [dropdownOpen, setDropdownOpen] = useState(null);
-  const [hoverTimeout, setHoverTimeout] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredResults, setFilteredResults] = useState([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
-  const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // State to manage login status
+  
+  const dropdownRef = useRef(null);
 
   const location = useLocation();
-  const username = location.state?.username || 'Guest'; 
+  const navigate = useNavigate();
+  const username = location.state?.username || 'Guest';
+
+  // Check if user is logged in on component mount
+  useEffect(() => {
+    const loggedInStatus = localStorage.getItem("isLoggedIn");
+    if (loggedInStatus === "true") {
+      setIsLoggedIn(true);
+    }
+  }, []);
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(null);
+      }
+    }
+    
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownRef]);
 
   const handleScroll = () => {
     const currentScrollY = window.scrollY;
@@ -31,10 +51,10 @@ function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
-  // 📌 Handles scrolling for all sections across different pages (About, Markets, Innovation)
   const handleNavigation = (path, sectionId) => {
     navigate(path);
     setMobileMenuOpen(false);
+    setDropdownOpen(null); // Close dropdown when navigating
     setTimeout(() => {
       const section = document.getElementById(sectionId);
       if (section) {
@@ -74,10 +94,7 @@ function Navbar() {
       ]
     },
     { title: "Locations", path: "/location" },
-    {
-      title: "Mockup",
-      path: "/mockup",
-    },
+    { title: "Mockup", path: "/mockup" },
   ];
 
   const allSearchOptions = [
@@ -94,20 +111,23 @@ function Navbar() {
     { label: "Locations", path: "/location", id: "location" },
     { label: "Mockup", path: "/mockup", id: "mockup" }
   ];
-  
+
   useEffect(() => {
     if (searchQuery.trim() === "") {
       setFilteredResults([]);
     } else {
-      setFilteredResults(
-        allSearchOptions.filter(option =>
-          option.label.toLowerCase().includes(searchQuery.toLowerCase())
-        )
+      const results = allSearchOptions.filter(option =>
+        option.label.toLowerCase().includes(searchQuery.toLowerCase())
       );
+      setFilteredResults(results);
     }
   }, [searchQuery]);
 
   const handleSearchSelection = (option) => {
+    if (!option || !option.label) {
+      console.error("Invalid option selected:", option);
+      return;
+    }
     setSearchQuery(option.label);
     setFilteredResults([]);
     setMobileSearchOpen(false);
@@ -120,17 +140,24 @@ function Navbar() {
     }
   };
 
+  const toggleDropdown = (index) => {
+    setDropdownOpen(dropdownOpen === index ? null : index);
+  };
+
   const toggleMobileDropdown = (index) => {
     setDropdownOpen(dropdownOpen === index ? null : index);
   };
 
+  const logout = () => {
+    localStorage.removeItem("isLoggedIn");
+    setIsLoggedIn(false);
+    navigate('/');
+  };
+
   return (
     <div className="w-full">
-      
       <div className="bg-green-300 h-2"></div>
-      <nav
-        className="fixed top-0 left-0 w-full z-20 bg-white shadow-md"
-      >
+      <nav className="fixed top-0 left-0 w-full z-20 bg-white shadow-md">
         {/* Top navbar section */}
         <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 py-4">
           <div className="flex items-center">
@@ -140,7 +167,7 @@ function Navbar() {
               className="h-8 sm:h-12 object-contain"
             />
           </div>
-          
+
           {/* Desktop Search Bar */}
           <div className="hidden md:block relative flex-grow mx-8">
             <input
@@ -151,7 +178,8 @@ function Navbar() {
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={handleKeyDown}
             />
-            
+
+
             {/* Dropdown for Search Recommendations */}
             {filteredResults.length > 0 && (
               <ul className="absolute w-full bg-white shadow-md mt-2 rounded-lg border border-gray-200 max-h-60 overflow-auto z-30">
@@ -167,50 +195,55 @@ function Navbar() {
               </ul>
             )}
           </div>
-          
+
           {/* Mobile buttons */}
           <div className="flex items-center space-x-4 md:space-x-6">
-            <button 
-              className="md:hidden text-gray-700" 
+            <button
+              className="md:hidden text-gray-700"
               onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
             >
               <FaSearch className="text-xl" />
             </button>
-            
+
             <div className="hidden md:flex items-center space-x-6 text-2xl text-black">
-              <a href="/login" className="flex items-center space-x-2 text-gray-700">
-               
-                <span className="text-sm font-medium">Login</span>
-              </a>
-              <a href="/cart" className="text-gray-700">
-                <FaShoppingCart />
-              </a>
-             
-              <Link to="/user" className="flex items-center space-x-2 text-gray-700">
-                 <FaUserCircle />
+              {!isLoggedIn && (
+                <a href="/login" className="flex items-center space-x-2 text-gray-700">
+                  <span className="text-sm font-medium">Login</span>
+                </a>
+              )}
+              {isLoggedIn && (
+                <>
+                  <a href="/cart" className="text-gray-700">
+                    <FaShoppingCart />
+                  </a>
+                  <Link to="/user" className="flex items-center space-x-2 text-gray-700">
+                    <FaUserCircle />
                   </Link>
-                
-            
-            </div>
-            
-            {/* <div className="md:hidden flex items-center space-x-4 text-xl text-black">
-              <a href="/user" className="text-gray-700">
-                <FaUserCircle />
-              </a>
-              <a href="/cart" className="text-gray-700">
-                <FaShoppingCart />
-              </a>
-            </div> */}
-            
-            <button 
-              className="md:hidden text-gray-700" 
+                </>
+              )}
+              {/* {isLoggedIn && (
+              <button
+                type="button"
+                onClick={logout}
+                className="text-grey-500 hover:text-black-500 font-medium transition-colors duration-200"
+              >
+                Logout
+              </button>
+            )} */}
+            </div> 
+
+
+            <button
+              className="md:hidden text-gray-700"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? <FaTimes className="text-xl" /> : <FaBars className="text-xl" />}
             </button>
           </div>
         </div>
+
         
+
         {/* Mobile Search Bar */}
         {mobileSearchOpen && (
           <div className="md:hidden px-4 pb-4">
@@ -223,7 +256,7 @@ function Navbar() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
               />
-              
+
               {filteredResults.length > 0 && (
                 <ul className="absolute w-full bg-white shadow-md mt-2 rounded-lg border border-gray-200 max-h-60 overflow-auto z-30">
                   {filteredResults.map((option, index) => (
@@ -240,25 +273,38 @@ function Navbar() {
             </div>
           </div>
         )}
-        
+
         {/* Desktop Navigation Menu */}
         <div className="bg-pink-900 hidden md:block !important">
-          <ul className="flex items-center justify-center space-x-6 py-3">
+          <ul className="flex items-center justify-center space-x-6 py-3" ref={dropdownRef}>
             {navLinks.map((link, index) => (
               <li
                 key={index}
-                className="relative group"
+                className="relative"
               >
-                <a href={link.path} className="text-white hover:text-green-300 font-medium">
+                <a 
+                  href={link.path} 
+                  className="text-white hover:text-green-300 font-medium"
+                  onClick={(e) => {
+                    if (link.dropdown) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleDropdown(index);
+                    }
+                  }}
+                >
                   {link.title}
                 </a>
-                {link.dropdown && (
-                  <ul className="absolute left-0 mt-2 bg-white shadow-lg rounded-md w-48 opacity-0 transform scale-95 transition-all duration-300 ease-out group-hover:opacity-100 group-hover:scale-100 z-30">
+                {link.dropdown && dropdownOpen === index && (
+                  <ul className="absolute left-0 mt-2 bg-white shadow-lg rounded-md w-48 z-30">
                     {link.dropdown.map((item, subIndex) => (
                       <li
                         key={subIndex}
                         className="px-4 py-2 hover:bg-green-100 text-gray-800 cursor-pointer border-b last:border-none transition-all duration-200"
-                        onClick={() => handleNavigation(link.path, item.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleNavigation(link.path, item.id);
+                        }}
                       >
                         {item.label}
                       </li>
@@ -269,14 +315,14 @@ function Navbar() {
             ))}
           </ul>
         </div>
-        
+
         {/* Mobile Navigation Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden bg-pink-900 overflow-hidden transition-all duration-300">
             <ul className="py-2">
               {navLinks.map((link, index) => (
                 <li key={index} className="px-4">
-                  <div 
+                  <div
                     className="flex justify-between items-center py-3 text-white"
                     onClick={() => link.dropdown ? toggleMobileDropdown(index) : handleNavigation(link.path, '')}
                   >
@@ -293,7 +339,7 @@ function Navbar() {
                       </span>
                     )}
                   </div>
-                  
+
                   {link.dropdown && dropdownOpen === index && (
                     <ul className="bg-white rounded-md overflow-hidden mb-2">
                       {link.dropdown.map((item, subIndex) => (
@@ -317,4 +363,4 @@ function Navbar() {
   );
 }
 
-export default Navbar;
+export default Navbarr;

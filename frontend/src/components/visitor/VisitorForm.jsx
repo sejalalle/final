@@ -11,9 +11,10 @@ const VisitorForm = ({ onSubmitSuccess }) => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [errors, setErrors] = useState({});
   const [emailStatus, setEmailStatus] = useState('');
-  
+  const [isLoading, setIsLoading] = useState(false);
+
   const [visitorData, setVisitorData] = useState({
-    srNo: '',
+    srNo: '', // Added srNo field
     date: new Date().toISOString().split('T')[0],
     timeIn: '',
     timeOut: '',
@@ -46,6 +47,7 @@ const VisitorForm = ({ onSubmitSuccess }) => {
       newErrors.contactEmail = 'Invalid email address';
     }
     if (!visitorData.department) newErrors.department = 'Department is required';
+    if (!visitorData.srNo) newErrors.srNo = 'Serial Number is required'; // Added validation for srNo
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -58,12 +60,13 @@ const VisitorForm = ({ onSubmitSuccess }) => {
         to_name: visitorData.contactPerson,
         visitor_name: visitorData.visitorName,
         visitor_purpose: visitorData.purpose,
-        visit_date: visitorData.date,
-        visit_time: visitorData.timeIn,
-        department: visitorData.department,
-        approve_link: `${window.location.origin}/approve-visitor/${visitorData.srNo}`,
-        reject_link: `${window.location.origin}/reject-visitor/${visitorData.srNo}`
-      };
+        visitor_date: visitorData.date, // Ensure this is populated
+        visitor_time: visitorData.timeIn, // Ensure this is populated
+        visitor_department: visitorData.department,
+        visitor_srNo: visitorData.srNo,
+        approval_link: `${window.location.origin}/approve-visitor/${visitorData.srNo}`, // Ensure this is populated
+        rejection_link: `${window.location.origin}/reject-visitor/${visitorData.srNo}` // Ensure this is populated
+    };
 
       const response = await emailjs.send(
         import.meta.env.VITE_EMAILJS_SERVICE_ID,
@@ -72,52 +75,68 @@ const VisitorForm = ({ onSubmitSuccess }) => {
         import.meta.env.VITE_EMAILJS_PUBLIC_KEY
       );
 
-      return response.status === 200; // Check if the response status is OK
+      return response.status === 200;
     } catch (error) {
       console.error('Error sending email:', error);
-      return false; // Return false if there was an error
+      return false;
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    const isPasswordValid = validatePassword(formData.password);
-    const isConfirmPasswordValid = validateConfirmPassword(formData.confirmPassword);
-  
-    if (!isPasswordValid || !isConfirmPasswordValid) return;
-  
     setIsLoading(true);
-    try {
-      console.log('Form Data:', formData); // Log form data
-  
-      const response = await fetch('http://localhost:5000/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-  
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-  
-      const data = await response.json();
-      console.log('Backend Response:', data); // Log backend response
-  
-      if (data.success && data.user) {
-        onSignUpSuccess(data.user);
-        navigate('/login');
-      } else {
-        console.error('Sign up failed:', data.message || 'Unknown error');
-        setErrors((prev) => ({ ...prev, general: data.message || 'Sign up failed. Please try again.' }));
-      }
-    } catch (error) {
-      console.error('Sign up failed:', error);
-      setErrors((prev) => ({ ...prev, general: 'Sign up failed. Please try again.' }));
-    } finally {
-      setIsLoading(false);
+
+    // Validate form fields
+    if (!validateForm()) {
+        setIsLoading(false);
+        return;
     }
-  };
+
+    try {
+        console.log('Form Data:', visitorData); // Log form data
+
+        // Send visitor data to the backend
+        const response = await fetch('http://localhost:5000/api/visitors', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(visitorData),
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Backend Response:', data); // Log backend response
+
+        if (data.success) {
+            // Send approval email
+            const emailSent = await sendApprovalEmail(data.visitor);
+
+            if (emailSent) {
+                setEmailStatus('Email sent successfully');
+            } else {
+                setEmailStatus('Failed to send email');
+            }
+
+            setShowSuccess(true); // Show success message
+
+            // Call onSubmitSuccess if it is a function
+            if (typeof onSubmitSuccess === 'function') {
+                onSubmitSuccess(data.visitor); // Trigger success callback
+            } else {
+                console.error('onSubmitSuccess is not a function');
+            }
+        } else {
+            setErrors((prev) => ({ ...prev, general: data.message || 'Failed to submit form' }));
+        }
+    } catch (error) {
+        console.error('Error submitting form:', error);
+        setErrors((prev) => ({ ...prev, general: 'Failed to submit form. Please try again.' }));
+    } finally {
+        setIsLoading(false); // Reset loading state
+    }
+};
 
   const visitorPassRef = useRef(null);
 
@@ -250,6 +269,19 @@ const VisitorForm = ({ onSubmitSuccess }) => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Serial Number</label>
+                <input
+                  type="text"
+                  name="srNo"
+                  value={visitorData.srNo}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-2 border ${errors.srNo ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent`}
+                  placeholder="Enter serial number"
+                />
+                {errors.srNo && <p className="text-red-500 text-sm mt-1">{errors.srNo}</p>}
+              </div>
+
+              <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">Visitor Name</label>
                 <input
                   type="text"
@@ -366,6 +398,8 @@ const VisitorForm = ({ onSubmitSuccess }) => {
       case 1:
         return (
           <div className="space-y-6">
+            <div>
+            </div>
             <h3 className="text-xl font-semibold text-gray-800 flex items-center">
               <span className="bg-teal-50 p-2 rounded-lg mr-2">
                 <svg className="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -499,7 +533,6 @@ const VisitorForm = ({ onSubmitSuccess }) => {
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 mt-20">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           <div className="px-8 py-6">
             <h2 className="text-3xl font-bold text-gray-900 mb-8">Visitor Entry Form</h2>
             
@@ -564,7 +597,7 @@ const VisitorForm = ({ onSubmitSuccess }) => {
               )}
             </div>
           </div>
-        </div>
+        
       </div>
       
       {showSuccess && (

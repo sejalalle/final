@@ -1,54 +1,38 @@
-import React, { createContext, useState, useEffect, useCallback } from 'react';
-import { api } from '../services/api';
+import React, { createContext, useContext, useState, useEffect } from "react";
 
-// Create context
-export const AuthContext = createContext();
+// Create Context
+const AuthContext = createContext();
 
+// AuthProvider Component
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  // Load user from local storage or API on mount
+  // Check for stored token on page load
   useEffect(() => {
-    const loadUser = async () => {
-      try {
-        // Try to get user from API
-        const res = await api.get('/api/auth/me');
-        setUser(res.data.data);
-      } catch (error) {
-        // If not logged in, check local storage
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadUser();
+    const token = localStorage.getItem("token");
+    if (token) {
+      setUser({ token });
+    }
   }, []);
 
-  // Register user
-  const register = async (userData) => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const res = await api.post('/api/auth/register', userData);
-      
-      setUser(res.data.data);
-      
-      if (userData.rememberMe) {
-        localStorage.setItem('user', JSON.stringify(res.data.data));
-      }
-      
-      return res.data;
-    } catch (error) {
-      setError(error.response?.data?.message || 'Registration failed');
-      throw error;
-    } finally {
-      setLoading(false);
-    }}
-}
+  // Login Function
+  const login = (userData) => {
+    localStorage.setItem("token", userData.token);
+    setUser(userData);
+  };
+
+  // Logout Function
+  const logout = () => {
+    localStorage.removeItem("token");
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+// Hook to use AuthContext
+export const useAuth = () => useContext(AuthContext);

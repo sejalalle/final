@@ -1,15 +1,69 @@
+
+
+
+/* Marquee animations for the slider */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes marquee2 {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
 .animate-marquee {
-    display: flex;
-    animation: scroll 20s linear infinite;
-    white-space: nowrap;
+  animation: marquee 30s linear infinite;
+  min-width: max-content;
+}
+
+.animate-marquee2 {
+  animation: marquee2 30s linear infinite;
+  min-width: max-content;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+/* Floating animation for background elements */
+@keyframes float {
+  0% {
+    transform: translateY(0) translateX(0);
   }
-  
-  @keyframes scroll {
-    from {
-      transform: translateX(100%);
-    }
-    to {
-      transform: translateX(-100%);
-    }
+  33% {
+    transform: translateY(-10px) translateX(10px);
   }
-  
+  66% {
+    transform: translateY(10px) translateX(-10px);
+  }
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+}
+
+.floating-circle {
+  position: absolute;
+  border-radius: 50%;
+  animation: float 8s ease-in-out infinite;
+}
+
+.floating-circle.delay {
+  animation-delay: 2s;
+}
+
+/* Container stylings */
+.slider-container {
+  position: relative;
+  overflow: hidden;
+}

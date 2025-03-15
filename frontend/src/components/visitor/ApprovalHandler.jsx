@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Alert, Container, CircularProgress, Button } from '@mui/material';
+import { Alert, Container, CircularProgress, Button, Typography } from '@mui/material';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 
 const ApprovalHandler = ({ type }) => {
   const { visitorId } = useParams();
@@ -28,8 +30,8 @@ const ApprovalHandler = ({ type }) => {
     };
   }, [visitorId, type, navigate]);
 
-  const updateVisitorStatus = async (visitorId, type) => {
-    const response = await fetch(`/api/visitor/${visitorId}`, {
+  const updateVisitorStatus = async (srNo, type) => {
+    const response = await fetch(`/api/visitor/${srNo}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -46,12 +48,19 @@ const ApprovalHandler = ({ type }) => {
   };
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 4 }}>
+    <Container maxWidth="sm" sx={{ mt: 4, textAlign: 'center' }}>
       {loading && <CircularProgress />}
       {status === 'success' && (
-        <Alert severity="success">
-          Visitor has been {type === 'approve' ? 'approved' : 'rejected'} successfully!
-        </Alert>
+        <>
+          {type === 'approve' ? (
+            <CheckCircleOutlineIcon sx={{ fontSize: 60, color: 'green' }} />
+          ) : (
+            <HighlightOffIcon sx={{ fontSize: 60, color: 'red' }} />
+          )}
+          <Typography variant="h5" sx={{ mt: 2 }}>
+            Visitor has been {type === 'approve' ? 'approved' : 'rejected'} successfully!
+          </Typography>
+        </>
       )}
       {status === 'error' && (
         <Alert severity="error">
@@ -59,9 +68,16 @@ const ApprovalHandler = ({ type }) => {
         </Alert>
       )}
       {status !== 'processing' && (
-        <Button variant="contained" color="primary" onClick={() => navigate('/')}>
-          Go Back
-        </Button>
+        <>
+        {type === 'approve' ? (
+          <CheckCircleOutlineIcon sx={{ fontSize: 60, color: 'green' }} />
+        ) : (
+          <HighlightOffIcon sx={{ fontSize: 60, color: 'red' }} />
+        )}
+        <Typography variant="h5" sx={{ mt: 2 }}>
+          Visitor has been {type === 'approve' ? 'approved' : 'rejected'} successfully!
+        </Typography>
+      </>
       )}
     </Container>
   );

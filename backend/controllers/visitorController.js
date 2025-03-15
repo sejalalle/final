@@ -1,4 +1,5 @@
 const Visitor = require('../models/Visitor');
+const { sendApprovalEmail } = require('../utils/email');
 
 // Helper function to convert "HH:mm" to a Date object
 const convertTimeToDate = (timeString) => {
@@ -14,135 +15,152 @@ const convertTimeToDate = (timeString) => {
 const getVisitors = async (req, res) => {
     try {
         const visitors = await Visitor.find();
-        res.status(200).json(visitors);
+        res.status(200).json({ success: true, data: visitors });
     } catch (error) {
         console.error('Error fetching visitors:', error);
-        res.status(500).json({ message: 'Error fetching visitors', error: error.message });
+        res.status(500).json({ success: false, message: 'Error fetching visitors', error: error.message });
     }
 };
 
 // Add a new visitor
 const addVisitor = async (req, res) => {
     try {
-        let { checkInTime } = req.body;
+        const { srNo, visitorName, contactEmail, phone, purpose, department, contactPerson, idNumber, checkInTime, checkOutTime } = req.body;
 
         // Convert checkInTime if it's in "HH:mm" format
-        if (checkInTime && typeof checkInTime === "string") {
-            checkInTime = convertTimeToDate(checkInTime);
+        const formattedCheckInTime = checkInTime && typeof checkInTime === "string" ? convertTimeToDate(checkInTime) : checkInTime;
+        const formattedCheckOutTime = checkOutTime && typeof checkOutTime === "string" ? convertTimeToDate(checkOutTime) : checkOutTime;
+
+        // Create new visitor
+        const newVisitor = new Visitor({
+            srNo,
+            visitorName,
+            contactEmail,
+            phone,
+            purpose,
+            department,
+            contactPerson,
+            idNumber,
+            checkInTime: formattedCheckInTime,
+            checkOutTime: formattedCheckOutTime,
+        });
+
+        // Save the visitor to the database
+        await newVisitor.save();
+
+        // Send approval email
+        const emailSent = await sendApprovalEmail(newVisitor);
+
+        if (!emailSent) {
+            console.error('Failed to send approval email');
         }
 
-        const newVisitor = new Visitor({ ...req.body, checkInTime });
-        await newVisitor.save();
-        
-        res.status(201).json({ message: "Visitor added successfully", visitor: newVisitor });
+        res.status(201).json({ success: true, message: "Visitor added successfully", data: newVisitor });
     } catch (error) {
         console.error('Error adding visitor:', error);
-        res.status(500).json({ message: 'Error adding visitor', error: error.message });
+        res.status(500).json({ success: false, message: 'Error adding visitor', error: error.message });
     }
 };
 
-// Get a specific visitor by ID
-const getVisitorById = async (req, res) => {
+// Get a specific visitor by srNo
+const getVisitorBySrNo = async (req, res) => {
     try {
-        const visitor = await Visitor.findById(req.params.id);
+        const visitor = await Visitor.findOne({ srNo: req.params.srNo });
         if (!visitor) {
-            return res.status(404).json({ message: 'Visitor not found' });
+            return res.status(404).json({ success: false, message: 'Visitor not found' });
         }
-        res.status(200).json(visitor);
+        res.status(200).json({ success: true, data: visitor });
     } catch (error) {
         console.error('Error fetching visitor:', error);
-        res.status(500).json({ message: 'Error fetching visitor', error: error.message });
+        res.status(500).json({ success: false, message: 'Error fetching visitor', error: error.message });
     }
 };
 
-// Update visitor details
+// Update visitor details by srNo
 const updateVisitor = async (req, res) => {
     try {
-        let { checkInTime } = req.body;
+        const { checkInTime, checkOutTime, ...otherFields } = req.body;
 
-        // Convert checkInTime if it's in "HH:mm" format
-        if (checkInTime && typeof checkInTime === "string") {
-            checkInTime = convertTimeToDate(checkInTime);
-        }
+        // Convert checkInTime and checkOutTime if they are in "HH:mm" format
+        const formattedCheckInTime = checkInTime && typeof checkInTime === "string" ? convertTimeToDate(checkInTime) : checkInTime;
+        const formattedCheckOutTime = checkOutTime && typeof checkOutTime === "string" ? convertTimeToDate(checkOutTime) : checkOutTime;
 
-        const updatedVisitor = await Visitor.findByIdAndUpdate(
-            req.params.id,
-            { ...req.body, checkInTime },
+        const updatedVisitor = await Visitor.findOneAndUpdate(
+            { srNo: req.params.srNo },
+            { ...otherFields, checkInTime: formattedCheckInTime, checkOutTime: formattedCheckOutTime },
             { new: true, runValidators: true }
         );
 
         if (!updatedVisitor) {
-            return res.status(404).json({ message: 'Visitor not found' });
+            return res.status(404).json({ success: false, message: 'Visitor not found' });
         }
-        res.status(200).json(updatedVisitor);
+        res.status(200).json({ success: true, message: 'Visitor updated successfully', data: updatedVisitor });
     } catch (error) {
         console.error('Error updating visitor:', error);
-        res.status(500).json({ message: 'Error updating visitor', error: error.message });
+        res.status(500).json({ success: false, message: 'Error updating visitor', error: error.message });
     }
 };
 
-// Delete a visitor
+// Delete a visitor by srNo
 const deleteVisitor = async (req, res) => {
     try {
-        const deletedVisitor = await Visitor.findByIdAndDelete(req.params.id);
+        const deletedVisitor = await Visitor.findOneAndDelete({ srNo: req.params.srNo });
         if (!deletedVisitor) {
-            return res.status(404).json({ message: 'Visitor not found' });
+            return res.status(404).json({ success: false, message: 'Visitor not found' });
         }
-        res.status(200).json({ message: 'Visitor deleted successfully' });
+        res.status(200).json({ success: true, message: 'Visitor deleted successfully' });
     } catch (error) {
         console.error('Error deleting visitor:', error);
-        res.status(500).json({ message: 'Error deleting visitor', error: error.message });
+        res.status(500).json({ success: false, message: 'Error deleting visitor', error: error.message });
     }
 };
 
-
-
-// Approve a visitor
+// Approve a visitor by srNo
 const approveVisitor = async (req, res) => {
     try {
-        const visitor = await Visitor.findByIdAndUpdate(
-            req.params.id,
-            { status: 'approved' }, // Update the status to "approved"
+        const visitor = await Visitor.findOneAndUpdate(
+            { srNo: req.params.srNo },
+            { status: 'Approved' }, // Update the status to "Approved"
             { new: true } // Return the updated document
         );
 
         if (!visitor) {
-            return res.status(404).json({ message: 'Visitor not found' });
+            return res.status(404).json({ success: false, message: 'Visitor not found' });
         }
 
-        res.json({ message: 'Visitor approved successfully', visitor });
+        res.status(200).json({ success: true, message: 'Visitor approved successfully', data: visitor });
     } catch (error) {
         console.error('Error approving visitor:', error);
-        res.status(500).json({ message: 'Failed to approve visitor', error });
+        res.status(500).json({ success: false, message: 'Failed to approve visitor', error: error.message });
     }
 };
 
-// Reject a visitor
+// Reject a visitor by srNo
 const rejectVisitor = async (req, res) => {
     try {
-        const visitor = await Visitor.findByIdAndUpdate(
-            req.params.id,
-            { status: 'rejected' }, // Update the status to "rejected"
+        const visitor = await Visitor.findOneAndUpdate(
+            { srNo: req.params.srNo },
+            { status: 'Rejected' }, // Update the status to "Rejected"
             { new: true } // Return the updated document
         );
 
         if (!visitor) {
-            return res.status(404).json({ message: 'Visitor not found' });
+            return res.status(404).json({ success: false, message: 'Visitor not found' });
         }
 
-        res.json({ message: 'Visitor rejected successfully', visitor });
+        res.status(200).json({ success: true, message: 'Visitor rejected successfully', data: visitor });
     } catch (error) {
         console.error('Error rejecting visitor:', error);
-        res.status(500).json({ message: 'Failed to reject visitor', error });
+        res.status(500).json({ success: false, message: 'Failed to reject visitor', error: error.message });
     }
 };
 
 module.exports = {
     getVisitors,
     addVisitor,
-    getVisitorById,
+    getVisitorBySrNo,
     updateVisitor,
     deleteVisitor,
-    approveVisitor, // Add this
-    rejectVisitor, // Add this
+    approveVisitor,
+    rejectVisitor,
 };

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom'; // useLocation is imported here
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ThemeProvider, CssBaseline, createTheme, Container, Box } from '@mui/material';
 import './index.css';
+import { AuthProvider, useAuth } from "./context/AuthContext"; // Import useAuth
 
 // Components
-import Navbar from './components/Navbarr';
+import Navbarr from './components/Navbarr';
 import VideoSection from './components/VideoSection';
 import About from './components/About';
 import BoxCategories from './components/BoxCategories';
@@ -17,7 +18,8 @@ import Slider from './components/Sliderr';
 import Article1 from './components/Article1';
 import Article2 from './components/Article2';
 import User from './components/User';
-
+import'./index.css'
+import './App.css'
 // Pages
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
@@ -28,12 +30,19 @@ import PreArrival from './components/visitor/PreArrival';
 import VisitorForm from './components/visitor/VisitorForm';
 import VisitorRecords from './components/visitor/VisitorRecords';
 import WebcamCapture from './components/visitor/WebcamCapture';
-import ApprovalHandler from './components/visitor/ApprovalHandler';
+import ApprovalHandler from './components/visitor/ApprovalHandler'; // Ensure this import is correct
 import Dashboard from './components/visitor/Dashboard';
+import Sidebar from './components/visitor/Sidebar';
+import ApproveVisitor from './components/visitor/pages/ApproveVisitor';
+import RejectVisitor from './components/visitor/pages/RejectVisitor';
 
 // Mockup Components
 import Home from './Mockup/pages/Home';
 import Customization from './Mockup/pages/Customization';
+import CartPage from './Mockup/pages/CartPage';
+import CheckoutPage from './Mockup/pages/CheckoutPage';
+import OrderSuccess from './Mockup/pages/OrderSuccess';
+
 
 // Create a custom Material-UI theme
 const theme = createTheme({
@@ -96,7 +105,7 @@ const DashboardLayout = ({ children }) => (
     flexDirection: 'column',
     bgcolor: 'background.default'
   }}>
-    <Navbar />
+    <Navbarr />
     <Box sx={{ flex: 1, p: 3 }}>
       {children}
     </Box>
@@ -131,44 +140,9 @@ const MockupLayout = ({ children }) => (
   </Box>
 );
 
-// Protected Route component with loading state
-const ProtectedRoute = ({ children }) => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem('token');
-      setIsAuthenticated(!!token);
-      setIsLoading(false);
-    };
-
-    checkAuth();
-  }, []);
-
-  if (isLoading) {
-    return (
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        minHeight: '100vh' 
-      }}>
-        Loading...
-      </Box>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return children;
-};
-
 const App = () => {
   const [currentView, setCurrentView] = useState('login');
-  const location = useLocation(); // useLocation is used here
+  const location = useLocation();
 
   // Define routes where Navbar and Footer should NOT appear
   const noHeaderFooterRoutes = [
@@ -176,7 +150,9 @@ const App = () => {
     "/signup",
     "/forgot-password",
     "/visitor-form",
+    "/visitor-records",
     "/webcam-capture",
+    "/dashboard",
     "/user"
   ];
 
@@ -205,7 +181,7 @@ const App = () => {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <div className="container-fluid mx-auto">
-        {!hideHeaderFooter && <Navbar />}
+        {!hideHeaderFooter && <Navbarr />}
         <Routes>
           {/* Authentication Routes */}
           <Route path="/login" element={renderAuthView()} />
@@ -217,8 +193,8 @@ const App = () => {
             element={
               <>
                 <VideoSection />
-                <Slider/>
                 <BoxCategories />
+                <Slider/>
                 <Cards />
               </>
             } 
@@ -249,16 +225,19 @@ const App = () => {
               <WebcamCapture />
             </VisitorLayout>
           } />
-          <Route path="/approve-visitor/:visitorId" element={
+          <Route path="/approve-visitor/:srNo" element={
             <VisitorLayout>
               <ApprovalHandler type="approve" />
             </VisitorLayout>
           } />
-          <Route path="/reject-visitor/:visitorId" element={
+          <Route path="/reject-visitor/:srNo" element={
             <VisitorLayout>
               <ApprovalHandler type="reject" />
             </VisitorLayout>
           } />
+          <Route path="/approve-visitor/:srNo" element={<ApproveVisitor />} />
+          <Route path="/reject-visitor/:srNo" element={<RejectVisitor />} />
+  
 
           {/* Mockup routes */}
           <Route path="/mockup" element={
@@ -271,6 +250,11 @@ const App = () => {
               <Customization />
             </MockupLayout>
           } />
+
+<Route path="/cart" element={<CartPage />} />  
+<Route path="/checkout" element={<CheckoutPage />} />
+<Route path="/oderSucess" element={<OrderSuccess/>}/>
+
           {/* Catch-all route for unknown paths */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

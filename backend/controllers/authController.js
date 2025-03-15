@@ -1,7 +1,7 @@
 const User = require('../models/User');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-const sendEmail = require('../utils/sendEmail');
+const sendEmail = require('../utils/email');
 
 // @desc    Register user
 // @route   POST /api/auth/register
@@ -147,7 +147,7 @@ exports.googleCallback = (req, res) => {
   setTokenCookie(res, token);
   
   // Redirect to frontend
-  res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard`);
+  res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173/'}`);
 };
 
 // @desc    GitHub OAuth callback
@@ -161,7 +161,7 @@ exports.githubCallback = (req, res) => {
   setTokenCookie(res, token);
   
   // Redirect to frontend
-  res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard`);
+  res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173/'}`);
 };
 
 // @desc    Forgot password
@@ -195,7 +195,7 @@ exports.forgotPassword = async (req, res, next) => {
     await user.save();
     
     // Create reset URL
-    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${resetToken}`;
+    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password/${resetToken}`;
     
     // Send email
     try {

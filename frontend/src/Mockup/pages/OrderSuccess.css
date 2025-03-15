@@ -1,0 +1,39 @@
+.order-success-container {
+    text-align: center;
+    padding: 40px;
+  }
+  
+  .order-success-title {
+    font-size: 28px;
+    color: #4CAF50;
+  }
+  
+  .order-success-message {
+    font-size: 18px;
+    margin-top: 10px;
+    color: #333;
+  }
+  
+  .order-success-actions {
+    margin-top: 20px;
+  }
+  
+  .success-btn {
+    padding: 10px 20px;
+    margin: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  .success-btn:first-child {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .success-btn:last-child {
+    background-color: #28a745;
+    color: white;
+  }
+  

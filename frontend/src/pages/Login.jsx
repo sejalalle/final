@@ -11,21 +11,13 @@ const Login = ({ onLoginSuccess, onSignUpClick, onForgotPasswordClick }) => {
 
   const navigate = useNavigate();
 
-  // Default onLoginSuccess function if not provided
   const handleLoginSuccess = (user) => {
-    console.log('Login successful:', user);
-    localStorage.setItem('token', user.token); // Save token to localStorage
-
-    // Redirect based on user role
-    if (user.role === 'visitor') {
-      navigate('/dashboard'); // Redirect to home page for visitors
-    } else {
-      navigate('/'); // Redirect to dashboard for other roles
-    }
-
+    console.log('Login successful:', user); // Debugging
+    localStorage.setItem('isLoggedIn', true);
+    localStorage.setItem('token', user.token);
+    navigate('/');
   };
 
-  // Use the provided onLoginSuccess or the default one
   const loginSuccessHandler = onLoginSuccess || handleLoginSuccess;
 
   const validateEmail = (email) => {
@@ -37,8 +29,8 @@ const Login = ({ onLoginSuccess, onSignUpClick, onForgotPasswordClick }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('Form submitted:', formData); // Debugging
 
-    // Validate email and password
     if (!validateEmail(formData.email)) {
       setErrors((prev) => ({ ...prev, email: 'Please enter a valid email address' }));
       return;
@@ -51,8 +43,6 @@ const Login = ({ onLoginSuccess, onSignUpClick, onForgotPasswordClick }) => {
 
     setIsLoading(true);
     try {
-      console.log('Login Form Data:', formData); // Log form data
-
       const response = await fetch('http://localhost:5000/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -65,10 +55,9 @@ const Login = ({ onLoginSuccess, onSignUpClick, onForgotPasswordClick }) => {
       }
 
       const data = await response.json();
-      console.log('Backend Response:', data); // Log backend response
+      console.log('API Response:', data); // Debugging
 
       if (data.success && data.user) {
-        // Call the login success handler
         loginSuccessHandler(data.user);
       } else {
         throw new Error(data.message || 'Login failed');
@@ -83,6 +72,7 @@ const Login = ({ onLoginSuccess, onSignUpClick, onForgotPasswordClick }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    console.log(`Input changed: ${name} = ${value}`); // Debugging
     setFormData((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: '', general: '' }));
   };
@@ -188,6 +178,7 @@ const Login = ({ onLoginSuccess, onSignUpClick, onForgotPasswordClick }) => {
             {/* Submit Button */}
             <button
               type="submit"
+              onClick={handleSubmit}
               disabled={isLoading}
               className="w-full py-3 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-sky-500 text-white rounded-xl
                        font-medium shadow-lg shadow-violet-200 hover:shadow-violet-300
